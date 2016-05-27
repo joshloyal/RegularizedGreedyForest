@@ -15,7 +15,6 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * * * * */
-#include <stdlib.h>
 
 #include "AzDmat.hpp"
 #include "AzPrint.hpp"
@@ -61,12 +60,12 @@ void AzDmat::_from_buffer(double* buf, int new_row_num, int new_col_num) {
   // just to get it to work lets create a bunch of data copies of the columns
   int rx, cx;
   for (cx = 0; cx < col_num; ++cx) {
-    double* col = (double*)malloc(row_num * sizeof(double));  // one copy
+    double* col = new double(row_num);
     for(rx = 0; rx < row_num; ++rx) {
         col[rx] = buf[rx * col_num + cx];  // assumes buf is in row-major order (c order)
     }
     column[cx] = new AzDvect(col, this->row_num);  // two copies
-    free(col);
+    delete col;
   }
 }
 
