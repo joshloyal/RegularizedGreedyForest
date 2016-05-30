@@ -3,7 +3,7 @@ all:
 
 .PHONY: clean test
 clean:
-	-rm -r build rgf.cpp rgf.so
+	-rm -r build *.cpp *.so
 
 test:
 	-py.test test/ -s

@@ -1,5 +1,6 @@
 from distutils.core import setup, Extension
 from Cython.Build import cythonize
+import numpy
 
 RGF_DIR = './rgf1.2/'
 
@@ -45,10 +46,17 @@ def get_rgf_sources():
 
     return [RGF_DIR + include for include in non_absolutes]
 
-ext = Extension("rgf", ["rgf.pyx"] + get_rgf_sources(),
-                include_dirs=get_rgf_includes(),
+ext = Extension("_rgf", ["_rgf.pyx", "dataset.pyx"] + get_rgf_sources(),
+                include_dirs=['.'] + get_rgf_includes() + [numpy.get_include()],
                 extra_compile_args=['-O2', '-fPIC'],
                 language='c++')
 
-setup(name="rgf",
-      ext_modules=cythonize(ext))
+ext_dataset = Extension("dataset", ["dataset.pyx"] + get_rgf_sources(),
+                include_dirs=get_rgf_includes() + [numpy.get_include()],
+                extra_compile_args=['-O2', '-fPIC'],
+                language='c++')
+
+
+setup(name="_rgf",
+      packages=["rgforest"],
+      ext_modules=cythonize([ext, ext_dataset]))

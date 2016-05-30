@@ -1,5 +1,5 @@
 /* * * * *
- *  AzException.hpp 
+ *  AzException.hpp
  *  Copyright (C) 2011, 2012 Rie Johnson
  *
  *  This program is free software: you can redistribute it and/or modify
@@ -22,111 +22,118 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdexcept>
 #include <iostream>
 #include <sstream>
-using namespace std; 
+
+using namespace std;
 
 enum AzRetCode {
-  AzNormal=0, 
+  AzNormal=0,
   AzAllocError=10,
   AzFileIOError=20,
-  AzInputError=30, 
-  AzInputMissing=31, 
-  AzInputNotValid=32, 
+  AzInputError=30,
+  AzInputMissing=31,
+  AzInputNotValid=32,
   AzConflict=100, /* all others */
-}; 
+};
 
 /*-----------------------------------------------------*/
-class AzException {
+class AzException : public std::runtime_error {
 public:
-  AzException(const char *string1, 
-              const char *string2, 
-              const char *string3=NULL) 
+  AzException(const char *string1,
+              const char *string2,
+              const char *string3=NULL)
+        : std::runtime_error(std::string(string1) + std::string(string2) + std::string(string3))
   {
-    reset(AzConflict, string1, string2, string3); 
+    reset(AzConflict, string1, string2, string3);
   }
 
-  AzException(AzRetCode retcode, 
-              const char *string1, 
-              const char *string2, 
-              const char *string3=NULL) 
+  AzException(AzRetCode retcode,
+              const char *string1,
+              const char *string2,
+              const char *string3=NULL)
+        : std::runtime_error(std::string(string1) + std::string(string2) + std::string(string3))
   {
-    reset(retcode, string1, string2, string3); 
+    reset(retcode, string1, string2, string3);
   }
+
+  ~AzException() throw() {}
 
   template <class T>
-  AzException(AzRetCode retcode, 
-              const char *string1, 
-              const char *string2, 
-              const char *string3, 
+  AzException(AzRetCode retcode,
+              const char *string1,
+              const char *string2,
+              const char *string3,
               T anything)
+        : std::runtime_error(std::string(string1) + std::string(string2) + std::string(string3))
   {
-    reset(retcode, string1, string2, string3); 
-    s3 << "; " << anything; 
+    reset(retcode, string1, string2, string3);
+    s3 << "; " << anything;
   }
 
-  void reset(AzRetCode retcode, 
-             const char *str1, 
-             const char *str2, 
+  void reset(AzRetCode retcode,
+             const char *str1,
+             const char *str2,
              const char *str3)
   {
-    this->retcode = retcode; 
-    if (str1 != NULL) s1 << str1; 
-    if (str2 != NULL) s2 << str2; 
-    if (str3 != NULL) s3 << str3; 
+    this->retcode = retcode;
+    if (str1 != NULL) s1 << str1;
+    if (str2 != NULL) s2 << str2;
+    if (str3 != NULL) s3 << str3;
   }
 
   AzRetCode getReturnCode() {
-    return retcode;   
+    return retcode;
   }
 
-  string getMessage() 
+  string getMessage()
   {
     if (retcode == AzNormal) {
 
     }
     else if (retcode == AzAllocError) {
-      message << "!Memory alloc error!"; 
+      message << "!Memory alloc error!";
     }
     else if (retcode == AzFileIOError) {
-      message << "!File I/O error!"; 
+      message << "!File I/O error!";
     }
     else if (retcode == AzInputError) {
-      message << "!Input error!"; 
+      message << "!Input error!";
     }
     else if (retcode == AzInputMissing) {
-      message << "!Missing input!"; 
+      message << "!Missing input!";
     }
     else if (retcode == AzInputNotValid) {
-      message << "!Input value is not valid!"; 
+      message << "!Input value is not valid!";
     }
     else if (retcode == AzConflict) {
-      message << "Conflict"; 
-    }
-    else { 
-      message << "Unknown error"; 
-    }
-
-    message << ": "; 
-    if (s1.str().find("Az") == 0) {
-      message << "(Detected in " << s1.str() << ") " << endl; 
+      message << "Conflict";
     }
     else {
-      message << s1.str() << " "; 
+      message << "Unknown error";
     }
-    message << s2.str(); 
+
+    message << ": ";
+    if (s1.str().find("Az") == 0) {
+      message << "(Detected in " << s1.str() << ") " << endl;
+    }
+    else {
+      message << s1.str() << " ";
+    }
+    message << s2.str();
     if (s3.str().length() > 0) {
-      message << " " << s3.str(); 
+      message << " " << s3.str();
     }
-    message << endl; 
-    return message.str(); 
+    message << endl;
+    return message.str();
   }
 
 protected:
-  AzRetCode retcode; 
+  AzRetCode retcode;
 
-  stringstream s1, s2, s3; 
-  stringstream message; 
+  stringstream s1, s2, s3;
+  stringstream message;
 };
 
-#endif 
+#endif

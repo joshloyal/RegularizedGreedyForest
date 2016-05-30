@@ -1,6 +1,6 @@
 
-#BIN_NAME = rgf
-BIN_NAME = rgf.so
+BIN_NAME = rgf
+#BIN_NAME = rgf.so
 BIN_DIR = bin
 TARGET = $(BIN_DIR)/$(BIN_NAME)
 CFLAGS = -Isrc/com -Isrc/tet_tools -O2
@@ -68,9 +68,10 @@ CPP_FILES= 	\
 	src/com/AzUtil.cpp
 
 #$(TARGET): $(CPP_FILES)
-all: 
-	/bin/rm -f $(TARGET)
-	g++ -shared -fPIC $(CPP_FILES) $(CFLAGS) -o $(TARGET)
 
-clean: 
+all:
+	/bin/rm -f $(TARGET)
+	g++ $(CPP_FILES) $(CFLAGS) -o $(TARGET)
+
+clean:
 	/bin/rm -f $(TARGET)
