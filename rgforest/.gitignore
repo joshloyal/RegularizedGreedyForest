@@ -4,3 +4,5 @@ __pycache__
 *.info
 *.pred
 *.cache
+*.cpp
+build

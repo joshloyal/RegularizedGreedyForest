@@ -6,4 +6,4 @@ clean:
 	-rm -r build *.cpp *.so
 
 test:
-	-py.test test/ -s
+	-py.test tests/ -s

@@ -11,6 +11,7 @@ cdef extern from "AzTE_ModelInfo.hpp":
 cdef extern from "AzTreeEnsemble.hpp":
     cdef cppclass AzTreeEnsemble:
        AzTreeEnsemble()
+       void write(char *fn)
 
 cdef extern from "AzTETrainer.hpp":
     cdef enum AzTETrainer_Ret:
@@ -53,7 +54,7 @@ cdef extern from "AzSvFeatInfo.hpp":
 
 cdef extern from "AzTreeEnsemble.hpp":
     cdef cppclass AzTreeEnsemble:
-        pass
+        void write(char *fn)
 
 cdef extern from "AzRgforest.hpp":
     cdef cppclass AzRgforest:
@@ -65,8 +66,10 @@ cdef extern from "AzRgforest.hpp":
                      AzSvFeatInfo *featInfo,
                      AzDvect *v_data_weights,
                      AzTreeEnsemble *inps_ens) except +
+
         AzTETrainer_Ret proceed_until() except +
+        void copy_to(AzTreeEnsemble *out_ens) except +
         void apply(AzTETrainer_TestData *td,
                    AzDvect *v_test_p,
                    AzTE_ModelInfo *info,
-                   AzTreeEnsemble *out_ens)
+                   AzTreeEnsemble *out_ens) except +
