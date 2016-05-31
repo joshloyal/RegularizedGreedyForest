@@ -65,9 +65,9 @@ cdef extern from "AzRgforest.hpp":
                      AzDvect *v_y,
                      AzSvFeatInfo *featInfo,
                      AzDvect *v_data_weights,
-                     AzTreeEnsemble *inps_ens) except +
+                     AzTreeEnsemble *inps_ens) nogil except +
 
-        AzTETrainer_Ret proceed_until() except +
+        AzTETrainer_Ret proceed_until() nogil except +
         void copy_to(AzTreeEnsemble *out_ens) except +
         void apply(AzTETrainer_TestData *td,
                    AzDvect *v_test_p,

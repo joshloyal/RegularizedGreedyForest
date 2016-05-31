@@ -67,11 +67,12 @@ cdef class RegularizedGreedyForest:
         # training loop
         try:
             # for warm start need to pass prev_ensemble to NULL
-            self.forest.startup(self.out[0], param, m_x, v_y, <AzSvFeatInfo*>featInfo, v_fixed_dw, NULL)
-            while True:
-                ret = self.forest.proceed_until()  # proceed until test_interval
-                if ret == AzTETrainer_Ret_Exit:
-                    break
+            with nogil:
+                self.forest.startup(self.out[0], param, m_x, v_y, <AzSvFeatInfo*>featInfo, v_fixed_dw, NULL)
+                while True:
+                    ret = self.forest.proceed_until()  # proceed until test_interval
+                    if ret == AzTETrainer_Ret_Exit:
+                        break
         finally:
             del m_x
             del v_y
