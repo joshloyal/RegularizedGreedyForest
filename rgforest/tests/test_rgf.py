@@ -3,7 +3,7 @@ import os
 
 import sklearn.metrics as metrics
 
-from rgforest import rgf
+import rgforest as rgf
 from rgforest import dataset
 from rgforest.tests.test_utils import get_test_data
 

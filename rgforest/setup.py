@@ -46,7 +46,7 @@ def get_rgf_sources():
 
     return [RGF_DIR + include for include in non_absolutes]
 
-ext = Extension("_rgf", ["_rgf.pyx", "dataset.pyx"] + get_rgf_sources(),
+ext = Extension("_rgf", ["_rgf.pyx", "dataset.pyx", "_memory.pyx"] + get_rgf_sources(),
                 include_dirs=['.'] + get_rgf_includes() + [numpy.get_include()],
                 extra_compile_args=['-O2', '-fPIC'],
                 language='c++')
@@ -56,7 +56,11 @@ ext_dataset = Extension("dataset", ["dataset.pyx"] + get_rgf_sources(),
                 extra_compile_args=['-O2', '-fPIC'],
                 language='c++')
 
+ext_memory = Extension("_memory", ["_memory.pyx"],
+                       include_dirs=[numpy.get_include()],
+                       extra_compile_args=['-O2'],
+                       language='c++')
 
 setup(name="_rgf",
       packages=["rgforest"],
-      ext_modules=cythonize([ext, ext_dataset]))
+      ext_modules=cythonize([ext, ext_dataset, ext_memory]))

@@ -1,43 +1,21 @@
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
+from libcpp cimport bool
 import numpy as np
 cimport numpy as cnp
 
 from rgforest.dataset cimport RGFMatrix
+cimport rgforest._memory as mem
 
 cnp.import_array()
-
-cdef class _finalizer:
-    cdef void *_data
-    def __dealloc__(self):
-        if self._data is not NULL:
-            free(self._data)
-
-
-cdef void set_base(cnp.ndarray arr, void *carr):
-    cdef _finalizer f = _finalizer()
-    f._data = <void*>carr
-    cnp.set_array_base(arr, f)
-
-
-cdef double *copy_array(double *buf, int n_elems) nogil:
-    cdef double *arr = <double*>malloc(sizeof(double) * n_elems)
-    memcpy(arr, buf, sizeof(double) * n_elems)
-    return arr
-
-cdef cnp.ndarray make_ndarray(double *buf, int n_samples):
-    cdef double[:] mv = <double[:n_samples]>buf
-    cdef cnp.ndarray arr = np.asarray(mv)
-    set_base(arr, buf)
-    return arr
 
 
 cdef class RegularizedGreedyForest:
     cdef AzRgforest* forest
     cdef AzOut* out
-    cdef int verbose
+    cdef bool verbose
     cdef bytes parameters
-    def __cinit__(self, parameters, verbose=0):
+    def __cinit__(self, parameters, verbose=False):
         self.forest = new AzRgforest()
         if self.forest is NULL:
             raise MemoryError()
@@ -45,7 +23,7 @@ cdef class RegularizedGreedyForest:
         self.parameters = parameters
 
         self.verbose = verbose
-        if verbose:
+        if self.verbose:
             self.out = new AzOut(&cout)
         else:
             self.out = new AzOut()
@@ -88,6 +66,7 @@ cdef class RegularizedGreedyForest:
 
         # training loop
         try:
+            # for warm start need to pass prev_ensemble to NULL
             self.forest.startup(self.out[0], param, m_x, v_y, <AzSvFeatInfo*>featInfo, v_fixed_dw, NULL)
             while True:
                 ret = self.forest.proceed_until()  # proceed until test_interval
@@ -107,12 +86,11 @@ cdef class RegularizedGreedyForest:
         cdef AzDvect v_p
         cdef AzTE_ModelInfo info
         cdef AzTETrainer_TestData *td = new AzTETrainer_TestData(self.out[0], m_test_x)
-        cdef int i
         cdef double *out
         try:
             self.forest.apply(td, &v_p, &info, &ens)
-            out = copy_array(v_p.point_u(), row_num)
-            return make_ndarray(out, row_num)
+            out = mem.copy_array(v_p.point_u(), row_num)
+            return mem.make_1d_ndarray(out, row_num)
         finally:
             del m_test_x
             del td
