@@ -36,6 +36,9 @@ cdef double *copy_array(double *array, int n_elements) nogil:
     return array_copy
 
 cdef cnp.ndarray[double, ndim=1] make_1d_ndarray(double *c_array, int n_elements):
+    """Creates a numpy ndarray from a C array that will clean up after itself
+    during destruction.
+    """
     cdef double[:] mv = <double[:n_elements]>c_array
     cdef cnp.ndarray[double, ndim=1] np_array = np.asarray(mv)
     set_base(np_array, c_array)
