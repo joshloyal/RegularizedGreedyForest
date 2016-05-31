@@ -1,4 +1,3 @@
-from libcpp.memory cimport shared_ptr, make_shared
 import numpy as np
 cimport numpy as cnp
 cnp.import_array()
@@ -88,7 +87,6 @@ def _init_svec_from_numpy(cnp.ndarray[double, ndim=1] arr):
         del vect
 
 cdef AzSmat* _init_smat_from_numpy(cnp.ndarray[double, ndim=2, mode='c'] arr):
-    # use a shared_ptr in practice
     cdef AzSmat* mat
     cdef int row_num = arr.shape[0], col_num = arr.shape[1]
     mat = new AzSmat(<double*>arr.data, row_num, col_num)

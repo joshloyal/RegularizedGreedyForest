@@ -42,7 +42,7 @@ cdef class RegularizedGreedyForest:
             sample_weight = np.ones_like(y)
         self.train(X, y, sample_weight)
 
-    cpdef void save_model(self, bytes file_name):
+    cpdef save_model(self, bytes file_name):
         cdef const char* output_fn = 'test_model'
         cdef AzTreeEnsemble ens
         self.forest.copy_to(&ens)
