@@ -49,6 +49,19 @@ def test_train_classification_weighted():
     test_score = metrics.roc_auc_score(y_test, y_proba)
     assert test_score > 0.75
 
+def test_classification_regression():
+    (X_train, y_train), (X_test, y_test) = get_test_data()
+    sample_weight = np.ones_like(y_train)
+    sample_weight[y_train == 0] = 0.5
+
+    est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
+    est.fit(X_train, y_train, sample_weight)
+
+    y_pred = est.predict(X_train)
+
+    fixture_name = './fixtures/rgf_classification_regression.npy'
+    saved_preds = np.loadtxt(fixture_name)
+    np.testing.assert_allclose(y_pred, saved_preds)
 
 def test_train_regression():
     (X_train, y_train), (X_test, y_test) = get_test_data(classification=False)
@@ -79,6 +92,16 @@ def test_train_regression_weighted():
     test_score = metrics.mean_squared_error(y_test, y_pred)
     assert test_score < 2
 
+def test_train_regression_regression():
+    (X_train, y_train), (X_test, y_test) = get_test_data(classification=False)
+    est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+    est.fit(X_train, y_train)
+
+    y_pred = est.predict(X_train)
+
+    fixture_name = './fixtures/rgf_regression_regression.npy'
+    saved_preds = np.loadtxt(fixture_name)
+    np.testing.assert_allclose(y_pred, saved_preds)
 
 def test_save_model():
     (X_train, y_train), (X_test, y_test) = get_test_data()
