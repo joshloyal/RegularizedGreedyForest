@@ -27,6 +27,25 @@ cdef class RGFTreeEnsemble:
         if self.ensemble is not NULL:
             del self.ensemble
 
+    def __iter__(self):
+        cdef int n_trees = self.ensemble.size()
+        cdef int tree_idx
+        for tree_idx in range(n_trees):
+            yield self._tree(tree_idx)
+
+    def __len__(self):
+        return self.ensemble.size()
+
+    def __getitem__(self, tree_idx):
+        if tree_idx > self.ensemble.size():
+            raise IndexError('tree index out of range')
+        return self._tree(tree_idx)
+
+    def _tree(self, tree_idx):
+        cdef RGFTree tree = RGFTree()
+        tree.copy_from(self.ensemble.tree(tree_idx))
+        return tree
+
     cdef AzTreeEnsemble *get_ensemble_ptr(self):
         return self.ensemble
 
@@ -48,9 +67,21 @@ cdef class RGFTreeEnsemble:
 
 
 cdef class RGFTree:
-    """wrap AzTree"""
-    pass
+    cdef AzTree *tree
+    def __cinit__(self):
+       self.tree = new AzTree()
+       if self.tree is NULL:
+           raise MemoryError('Could not allocate RGFTree')
 
+    def __dealloc__(self):
+        if self.tree is not NULL:
+            del self.tree
+
+    cdef copy_from(self, const AzTree *new_tree):
+        self.tree.copy_from(<AzTreeNodes*>new_tree)
+
+    def n_nodes(self):
+        return self.tree.nodeNum()
 
 cdef class RGFBuilder:
     cdef AzRgforest* forest

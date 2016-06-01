@@ -8,12 +8,6 @@ cdef extern from "AzTE_ModelInfo.hpp":
     cdef cppclass AzTE_ModelInfo:
         AzTE_ModelInfo()
 
-cdef extern from "AzTreeEnsemble.hpp":
-    cdef cppclass AzTreeEnsemble:
-       AzTreeEnsemble()
-       void apply(AzSmat *m_data, AzDvect *v_pred) nogil except +
-       void write(char *fn)
-
 cdef extern from "AzTETrainer.hpp":
     cdef enum AzTETrainer_Ret:
         AzTETrainer_Ret_TestNow = 1
@@ -53,9 +47,23 @@ cdef extern from "AzSvFeatInfo.hpp":
     cdef cppclass AzSvFeatInfo:
         pass
 
+cdef extern from "AzTreeNodes.hpp":
+    cdef cppclass AzTreeNodes:
+        pass
+
+cdef extern from "AzTree.hpp":
+    cdef cppclass AzTree:
+        AzTree()
+        void copy_from(const AzTreeNodes *tree_nodes)
+        int nodeNum()
+
 cdef extern from "AzTreeEnsemble.hpp":
     cdef cppclass AzTreeEnsemble:
-        void write(char *fn)
+       AzTreeEnsemble()
+       void apply(AzSmat *m_data, AzDvect *v_pred) nogil except +
+       void write(char *fn) nogil
+       const AzTree *tree(int tx) nogil
+       int size() nogil
 
 cdef extern from "AzRgforest.hpp":
     cdef cppclass AzRgforest:
