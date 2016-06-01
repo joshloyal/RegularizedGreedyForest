@@ -9,6 +9,86 @@ cimport rgforest._memory as mem
 
 cnp.import_array()
 
+cdef class RGFTreeEnsemble:
+    """wrap AzTreeEnsemble in an extension type for use in python (may need to also wrap AzTree)"""
+    cdef AzTreeEnsemble *ensemble
+
+    def __cinit__(self):
+        self.ensemble = new AzTreeEnsemble()
+        if self.ensemble is NULL:
+            raise MemoryError('Unable to initialize tree ensemble.')
+
+    def __dealloc__(self):
+        if self.ensemble is not NULL:
+            del self.ensemble
+
+    cdef AzTreeEnsemble *get_ensemble_ptr(self):
+        return self.ensemble
+
+
+cdef class RGFTree:
+    """wrap AzTree"""
+    pass
+
+
+# also need a warm start version
+cdef RGFTreeEnsemble train_rgf(cnp.ndarray[double, ndim=2, mode='c'] X,
+                               cnp.ndarray[double, ndim=1] y,
+                               cnp.ndarray[double, ndim=1] sample_weight,
+                               bytes parameters,
+                               bool verbose=False):
+    cdef RGFMatrix rgf_matrix = RGFMatrix(X, y)
+    cdef AzRgforest *forest  = new AzRgforest()
+    cdef char* param = parameters
+    cdef int inp_num = X.shape[0]
+    cdef AzDvect* v_y = new AzDvect()
+    cdef AzDvect* v_fixed_dw = new AzDvect()
+    cdef AzSmat* m_x = new AzSmat()
+    cdef AzTETrainer_Ret ret
+    cdef AzSvFeatInfoClone* featInfo = new AzSvFeatInfoClone()
+    #cdef AzTreeEnsemble *ensemble = new AzTreeEnsemble()
+    cdef RGFTreeEnsemble ensemble = RGFTreeEnsemble()
+    cdef AzOut *out
+
+    if verbose:
+        out = new AzOut(&cout)
+    else:
+        out = new AzOut()
+
+    # set-up input data
+    v_y.set(<double*>y.data, inp_num)
+    v_fixed_dw.set(<double*>sample_weight.data, inp_num)
+    m_x.set(rgf_matrix.feat())
+    featInfo.reset(rgf_matrix.featInfo())
+
+    # training loop
+    try:
+        # for warm start need to pass prev_ensemble to NULL
+        with nogil:
+            forest.startup(
+                out[0],
+                param,
+                m_x,
+                v_y,
+                <AzSvFeatInfo*>featInfo,
+                v_fixed_dw,
+                NULL)
+            while True:
+                ret = forest.proceed_until()  # proceed until test_interval
+                if ret == AzTETrainer_Ret_Exit:
+                    break
+        forest.copy_to(ensemble.get_ensemble_ptr())
+    finally:
+        del rgf_matrix
+        del forest
+        del out
+        del v_y
+        del v_fixed_dw
+        del m_x
+        del featInfo
+
+    return ensemble
+
 
 cdef class RegularizedGreedyForest:
     cdef AzRgforest* forest
