@@ -1,17 +1,13 @@
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
-from _rgf import RegularizedGreedyForest
+from ._rgf import RGFBuilder, RGFTreeEnsemble
 
-
-double_t = np.float64
-
-PARAM_FMT = ('reg_L2={l2},loss={loss},test_interval={test_interval},'
-             'max_leaf_forest={max_leaf_forest}')
 
 def check_weight(sample_weight):
     if np.any(sample_weight == 0):
         raise ValueError('`sample_weight` must be non-zero')
+
 
 class RegularizedGreedyForestEstimator(BaseEstimator):
     def __init__(self, max_leaf_nodes=500, l2=1,  loss='LS',
@@ -22,32 +18,22 @@ class RegularizedGreedyForestEstimator(BaseEstimator):
         self.test_interval = test_interval
         self.verbose = verbose
 
-        self._trainer = RegularizedGreedyForest(
-            self.param_str, int(self.verbose))
-
-    @property
-    def param_str(self):
-        parameters = PARAM_FMT.format(
-            l2=self.l2,
-            loss=self.loss,
-            test_interval=self.test_interval,
-            max_leaf_forest=self.max_leaf_nodes)
-        if self.verbose:
-            parameters += ',Verbose'
-        return parameters
+        self.ensemble = RGFTreeEnsemble()
 
     def _fit(self, X, y, sample_weight=None):
         check_weight(sample_weight)
-        self._trainer.fit(X, y, sample_weight)
+        builder = RGFBuilder(self.max_leaf_nodes, self.l2, self.loss,
+                             self.test_interval, self.verbose)
+        builder.build(self.ensemble, X, y, sample_weight)
 
     def fit(self, X, y, sample_weight=None):
         self._fit(X, y, sample_weight)
 
     def predict(self, X):
-        return self._trainer.predict(X)
+        return self.ensemble.predict(X)
 
     def save(self, file_name):
-        self._trainer.save_model(file_name)
+        self.ensemble.save(file_name)
 
 
 class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
@@ -73,7 +59,7 @@ class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
         return (y > 0.5).astype(np.int32)
 
     def predict_proba(self, X):
-        return self._trainer.predict(X)
+        return self.ensemble.predict(X)
 
     def predict(self, X):
         y_proba = self.predict_proba(X)

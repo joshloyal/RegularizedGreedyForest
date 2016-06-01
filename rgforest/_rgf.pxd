@@ -11,6 +11,7 @@ cdef extern from "AzTE_ModelInfo.hpp":
 cdef extern from "AzTreeEnsemble.hpp":
     cdef cppclass AzTreeEnsemble:
        AzTreeEnsemble()
+       void apply(AzSmat *m_data, AzDvect *v_pred) nogil except +
        void write(char *fn)
 
 cdef extern from "AzTETrainer.hpp":

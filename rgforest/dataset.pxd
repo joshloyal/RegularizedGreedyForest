@@ -6,7 +6,7 @@ cdef extern from "AzDmat.hpp":
         AzDvect(double *inp, int inp_num)
         int rowNum()
         double get(int row)
-        double *point_u()
+        double *point_u() nogil
         void set(AzDvect* inp,  double coeff=1) except +
         void set(const double* inp, int inp_num) except +
 
