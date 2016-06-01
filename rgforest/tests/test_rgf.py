@@ -59,7 +59,7 @@ def test_classification_regression():
 
     y_pred = est.predict(X_train)
 
-    fixture_name = './fixtures/rgf_classification_regression.npy'
+    fixture_name = 'tests/fixtures/rgf_classification_regression.npy'
     saved_preds = np.loadtxt(fixture_name)
     np.testing.assert_allclose(y_pred, saved_preds)
 
@@ -99,7 +99,7 @@ def test_train_regression_regression():
 
     y_pred = est.predict(X_train)
 
-    fixture_name = './fixtures/rgf_regression_regression.npy'
+    fixture_name = 'tests/fixtures/rgf_regression_regression.npy'
     saved_preds = np.loadtxt(fixture_name)
     np.testing.assert_allclose(y_pred, saved_preds)
 
