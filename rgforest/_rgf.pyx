@@ -71,7 +71,7 @@ cdef class RGFTree:
 
         if 'nodes' not in d:
             raise ValueError("You have loaded a RGFTree version which ",
-                             "canot be imported.")
+                             "cannot be imported.")
 
         node_ndarray = d['nodes']
         self.nodes = <Node*> realloc(self.nodes, <SIZE_t> node_ndarray.shape[0] * sizeof(Node))
@@ -98,7 +98,7 @@ cdef class RGFTree:
         cdef int node_idx
         self.node_count = tree.nodeNum()
 
-        self.nodes = <Node*>malloc(sizeof(Node) * self.node_count)
+        self.nodes = <Node*>realloc(self.nodes, sizeof(Node) * self.node_count)
         if self.nodes is NULL:
             raise MemoryError('Could not allocate Nodes')
 
