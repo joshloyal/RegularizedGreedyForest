@@ -14,3 +14,9 @@ class TestRGFTreeEnsemble(object):
 
     def test_smoketest(self):
         assert len(self.ensemble) == len([tree for tree in self.ensemble])
+
+        tree = self.ensemble[0]
+        tree.children_left
+        tree.children_right
+        tree.feature
+        tree.threshold

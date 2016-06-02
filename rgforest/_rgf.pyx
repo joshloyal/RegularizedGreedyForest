@@ -1,13 +1,113 @@
+from cpython cimport Py_INCREF, PyObject
+
 from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
 from libcpp cimport bool
+
 import numpy as np
-cimport numpy as cnp
+cimport numpy as np
+np.import_array()
 
 from rgforest.dataset cimport RGFMatrix
 cimport rgforest._memory as mem
 
-cnp.import_array()
+
+ctypedef np.npy_intp SIZE_t
+ctypedef np.npy_float64 DOUBLE_t
+
+
+cdef struct Node:
+    SIZE_t left_child
+    SIZE_t right_child
+    SIZE_t feature
+    DOUBLE_t threshold
+
+
+# numpy struct dtype
+NODE_DTYPE = np.dtype({
+    'names': ['left_child', 'right_child', 'feature', 'threshold'],
+    'formats': [np.intp, np.intp, np.intp, np.float64],
+    'offsets': [
+        <Py_ssize_t> &(<Node*> NULL).left_child,
+        <Py_ssize_t> &(<Node*> NULL).right_child,
+        <Py_ssize_t> &(<Node*> NULL).feature,
+        <Py_ssize_t> &(<Node*> NULL).threshold
+        ]
+})
+
+
+cdef Node _to_node(const AzTreeNode *tree_node) nogil:
+    cdef Node node
+    node.left_child = tree_node.le_nx
+    node.right_child = tree_node.gt_nx
+    node.feature = tree_node.fx
+    node.threshold = tree_node.border_val
+    return node
+
+
+cdef class RGFTree:
+    cdef AzTree *tree
+    cdef Node* nodes
+    def __cinit__(self):
+        self.tree = new AzTree()
+        if self.tree is NULL:
+            raise MemoryError('Could not allocate RGFTree')
+
+        self.nodes = NULL
+
+    def __dealloc__(self):
+        if self.tree is not NULL:
+            del self.tree
+
+        if self.nodes is not NULL:
+            free(self.nodes)
+
+    property node_count:
+        def __get__(self):
+            return self.tree.nodeNum()
+
+    property children_left:
+        def __get__(self):
+            return self._get_node_ndarray()['left_child'][:self.node_count]
+
+    property children_right:
+        def __get__(self):
+            return self._get_node_ndarray()['right_child'][:self.node_count]
+
+    property feature:
+        def __get__(self):
+            return self._get_node_ndarray()['feature'][:self.node_count]
+
+    property threshold:
+        def __get__(self):
+            return self._get_node_ndarray()['threshold'][:self.node_count]
+
+    cdef copy_from(self, const AzTree *new_tree):
+        self.tree.copy_from(<AzTreeNodes*>new_tree)
+        self.build_tree()
+
+    cdef build_tree(self):
+        cdef int n_nodes = self.tree.nodeNum()
+        cdef int node_idx
+
+        self.nodes = <Node*>malloc(sizeof(Node) * n_nodes)
+        if self.nodes is NULL:
+            raise MemoryError('Could not allocate Nodes')
+
+        for node_idx in range(n_nodes):
+            self.nodes[node_idx] = _to_node(self.tree.node(node_idx))
+
+    cdef np.ndarray _get_node_ndarray(self):
+        cdef int n_nodes = self.tree.nodeNum()
+
+        # create numpy array
+        Py_INCREF(NODE_DTYPE)
+        cdef Node[:] mv = <Node[:n_nodes]>self.nodes
+        cdef np.ndarray arr = np.asarray(mv)
+        Py_INCREF(self)
+
+        arr.base = <PyObject*> self
+        return arr
 
 
 PARAM_FMT = ('reg_L2={l2},loss={loss},test_interval={test_interval},'
@@ -37,8 +137,12 @@ cdef class RGFTreeEnsemble:
         return self.ensemble.size()
 
     def __getitem__(self, tree_idx):
-        if tree_idx > self.ensemble.size():
+        if tree_idx >= self.ensemble.size():
             raise IndexError('tree index out of range')
+
+        if tree_idx < 0:
+            raise IndexError('negative indices not supported')
+
         return self._tree(tree_idx)
 
     def _tree(self, tree_idx):
@@ -49,7 +153,7 @@ cdef class RGFTreeEnsemble:
     cdef AzTreeEnsemble *get_ensemble_ptr(self):
         return self.ensemble
 
-    cpdef cnp.ndarray[double, ndim=1] predict(self, cnp.ndarray[double, ndim=2, mode='c'] X):
+    cpdef np.ndarray[double, ndim=1] predict(self, np.ndarray[double, ndim=2, mode='c'] X):
         cdef int row_num = X.shape[0], col_num = X.shape[1]
         cdef AzDvect v_p
         cdef AzSmat *m_test_x = new AzSmat(<double*>X.data, row_num, col_num)
@@ -65,23 +169,6 @@ cdef class RGFTreeEnsemble:
     cpdef save(self, bytes file_name):
         self.ensemble.write(file_name)
 
-
-cdef class RGFTree:
-    cdef AzTree *tree
-    def __cinit__(self):
-       self.tree = new AzTree()
-       if self.tree is NULL:
-           raise MemoryError('Could not allocate RGFTree')
-
-    def __dealloc__(self):
-        if self.tree is not NULL:
-            del self.tree
-
-    cdef copy_from(self, const AzTree *new_tree):
-        self.tree.copy_from(<AzTreeNodes*>new_tree)
-
-    def n_nodes(self):
-        return self.tree.nodeNum()
 
 cdef class RGFBuilder:
     cdef AzRgforest* forest
@@ -134,9 +221,9 @@ cdef class RGFBuilder:
 
     cpdef build(self,
                 RGFTreeEnsemble ensemble,
-                cnp.ndarray[double, ndim=2, mode='c'] X,
-                cnp.ndarray[double, ndim=1] y,
-                cnp.ndarray[double, ndim=1] sample_weight):
+                np.ndarray[double, ndim=2, mode='c'] X,
+                np.ndarray[double, ndim=1] y,
+                np.ndarray[double, ndim=1] sample_weight):
         cdef RGFMatrix rgf_matrix = RGFMatrix(X, y)
         cdef AzRgforest *forest  = new AzRgforest()
         cdef char* param = self.parameter_string
