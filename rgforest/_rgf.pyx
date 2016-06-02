@@ -1,6 +1,6 @@
 from cpython cimport Py_INCREF, PyObject
 
-from libc.stdlib cimport malloc, free
+from libc.stdlib cimport malloc, free, realloc
 from libc.string cimport memcpy
 from libcpp cimport bool
 
@@ -46,8 +46,8 @@ cdef Node _to_node(const AzTreeNode *tree_node) nogil:
 
 
 cdef class RGFTree:
-    cdef Node* nodes
     cdef public int node_count
+    cdef Node* nodes
     def __cinit__(self):
         self.node_count = 0
         self.nodes = NULL
@@ -55,6 +55,28 @@ cdef class RGFTree:
     def __dealloc__(self):
         if self.nodes is not NULL:
             free(self.nodes)
+
+    def __reduce__(self):
+        """Reduce re-implementaiton for pickling."""
+        return (RGFTree, (), self.__getstate__())
+
+    def __getstate__(self):
+        d = {}
+        d["node_count"] = self.node_count
+        d["nodes"] = self._get_node_ndarray()
+        return d
+
+    def __setstate__(self, d):
+        self.node_count = d["node_count"]
+
+        if 'nodes' not in d:
+            raise ValueError("You have loaded a RGFTree version which ",
+                             "canot be imported.")
+
+        node_ndarray = d['nodes']
+        self.nodes = <Node*> realloc(self.nodes, <SIZE_t> node_ndarray.shape[0] * sizeof(Node))
+        nodes = memcpy(self.nodes, (<np.ndarray> node_ndarray).data,
+                       <SIZE_t> node_ndarray.shape[0] * sizeof(Node))
 
     property children_left:
         def __get__(self):
@@ -71,10 +93,6 @@ cdef class RGFTree:
     property threshold:
         def __get__(self):
             return self._get_node_ndarray()['threshold'][:self.node_count]
-
-    #cdef copy_from(self, const AzTree *new_tree):
-    #    self.tree.copy_from(<AzTreeNodes*>new_tree)
-    #    self.build_tree()
 
     cdef copy_from(self, const AzTree *tree):
         cdef int node_idx

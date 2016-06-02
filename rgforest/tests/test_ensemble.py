@@ -1,3 +1,7 @@
+import cPickle as pickle
+import os
+import tempfile
+
 import numpy as np
 
 import rgforest as rgf
@@ -20,3 +24,21 @@ class TestRGFTreeEnsemble(object):
         tree.children_right
         tree.feature
         tree.threshold
+
+    def test_tree_pickle(self):
+        tree = self.ensemble[0]
+
+        with tempfile.NamedTemporaryFile('wr') as tfile:
+            file_name = tfile.name
+
+        try:
+            pickle.dump(tree, open(file_name, 'wb'))
+            unpickle_tree = pickle.load(open(file_name, 'rb'))
+        finally:
+            os.remove(file_name)
+
+        assert unpickle_tree.node_count == tree.node_count
+        np.testing.assert_allclose(unpickle_tree.children_left, tree.children_left)
+        np.testing.assert_allclose(unpickle_tree.children_right, tree.children_right)
+        np.testing.assert_allclose(unpickle_tree.feature, tree.feature)
+        np.testing.assert_allclose(unpickle_tree.threshold, tree.threshold)
