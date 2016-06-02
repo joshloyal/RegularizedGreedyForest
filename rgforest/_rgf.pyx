@@ -46,25 +46,15 @@ cdef Node _to_node(const AzTreeNode *tree_node) nogil:
 
 
 cdef class RGFTree:
-    cdef AzTree *tree
     cdef Node* nodes
+    cdef public int node_count
     def __cinit__(self):
-        self.tree = new AzTree()
-        if self.tree is NULL:
-            raise MemoryError('Could not allocate RGFTree')
-
+        self.node_count = 0
         self.nodes = NULL
 
     def __dealloc__(self):
-        if self.tree is not NULL:
-            del self.tree
-
         if self.nodes is not NULL:
             free(self.nodes)
-
-    property node_count:
-        def __get__(self):
-            return self.tree.nodeNum()
 
     property children_left:
         def __get__(self):
@@ -82,27 +72,25 @@ cdef class RGFTree:
         def __get__(self):
             return self._get_node_ndarray()['threshold'][:self.node_count]
 
-    cdef copy_from(self, const AzTree *new_tree):
-        self.tree.copy_from(<AzTreeNodes*>new_tree)
-        self.build_tree()
+    #cdef copy_from(self, const AzTree *new_tree):
+    #    self.tree.copy_from(<AzTreeNodes*>new_tree)
+    #    self.build_tree()
 
-    cdef build_tree(self):
-        cdef int n_nodes = self.tree.nodeNum()
+    cdef copy_from(self, const AzTree *tree):
         cdef int node_idx
+        self.node_count = tree.nodeNum()
 
-        self.nodes = <Node*>malloc(sizeof(Node) * n_nodes)
+        self.nodes = <Node*>malloc(sizeof(Node) * self.node_count)
         if self.nodes is NULL:
             raise MemoryError('Could not allocate Nodes')
 
-        for node_idx in range(n_nodes):
-            self.nodes[node_idx] = _to_node(self.tree.node(node_idx))
+        for node_idx in range(self.node_count):
+            self.nodes[node_idx] = _to_node(tree.node(node_idx))
 
     cdef np.ndarray _get_node_ndarray(self):
-        cdef int n_nodes = self.tree.nodeNum()
-
         # create numpy array
         Py_INCREF(NODE_DTYPE)
-        cdef Node[:] mv = <Node[:n_nodes]>self.nodes
+        cdef Node[:] mv = <Node[:self.node_count]>self.nodes
         cdef np.ndarray arr = np.asarray(mv)
         Py_INCREF(self)
 
