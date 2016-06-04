@@ -10,31 +10,35 @@ from distutils.core import setup
 
 PACKAGES = [
     'rgforest',
-    'rgforest.tests'
-]
-
-
-RGF_DIR = './rgf1.2/'
+    'rgforest.tests']
 
 
 RGF_MODS = [
-    '_rgf',
-    'dataset'
-    ]
+    'rgforest._rgf',
+    'rgforest.dataset']
 
 
-OTHER_MODS = ['_memory']
+OTHER_MODS = ['rgforest._memory']
 
 
-def get_rgf_includes():
+RGF_DIR = os.path.join('rgforest', 'rgf1.2')
+
+
+def get_rgf_directory(root):
+    return os.path.join(root, RGF_DIR)
+
+
+def get_rgf_includes(root):
     non_absolutes = [
         'src/com',
         'src/tet',
         'src/tet_tools']
-    return [RGF_DIR + include for include in non_absolutes]
+
+    rgf_dir = get_rgf_directory(root)
+    return [os.path.join(rgf_dir, include) for include in non_absolutes]
 
 
-def get_rgf_sources():
+def get_rgf_sources(root):
     non_absolutes = [
 	'src/tet/driv_rgf.cpp',
 	'src/com/AzDmat.cpp',
@@ -66,11 +70,13 @@ def get_rgf_sources():
 	'src/tet/AzTrTreeFeat.cpp',
 	'src/com/AzUtil.cpp',]
 
-    return [RGF_DIR + include for include in non_absolutes]
+    rgf_dir = get_rgf_directory(root)
+    return [os.path.join(rgf_dir, include) for include in non_absolutes]
 
 
 def clean(path):
     for name in RGF_MODS + OTHER_MODS:
+        name = name.replace('.', '/')
         for ext in ['.cpp', '.so']:
             file_path = os.path.join(path, name + ext)
             if os.path.exists(file_path):
@@ -92,7 +98,7 @@ def generate_sources(root):
     for base, _, files in os.walk(root):
         for filename in files:
             if filename.endswith('pyx'):
-                yield filename
+                yield os.path.join(base, filename)
 
 
 def generate_cython(root):
@@ -114,39 +120,19 @@ def cythonize_source(source):
         raise OSError('Cython needs to be installed')
 
 
-def configuration(parent_package="", top_path=None):
-    config = Configuration("rgforest", parent_package, top_path)
-    config.add_extension("_rgf",
-                         sources=["_rgf.pyx"] + get_rgf_sources(),
-                         include_dirs=get_rgf_includes() + [numpy.get_include()],
-                         extra_compile_args=['-O3', '-fPIC'],
-                         language='c++')
-    config.add_extension("dataset",
-                         sources=["dataset.pyx"] + get_rgf_sources(),
-                         include_dirs=get_rgf_includes() + [numpy.get_include()],
-                         extra_compile_args=['-O3', '-fPIC'],
-                         language='c++')
-    config.add_extension("_memory",
-                         sources=["_memory.pyx"],
-                         include_dirs=[numpy.get_include()],
-                         extra_compile_args=['-O3'],
-                         language='c++')
-    return config
-
-
-def generate_extensions():
+def generate_extensions(root):
     ext_modules = []
     for mod_name in RGF_MODS:
-        mod_path = mod_name + '.cpp'
+        mod_path = mod_name.replace('.', '/') + '.cpp'
         ext_modules.append(
             Extension(mod_name,
-                      sources=[mod_path] + get_rgf_sources(),
-                      include_dirs=get_rgf_includes() + [numpy.get_include()],
+                      sources=[mod_path] + get_rgf_sources(root),
+                      include_dirs=get_rgf_includes(root) + [numpy.get_include()],
                       extra_compile_args=['-O3', '-fPIC'],
                       language='c++'))
 
     for mod_name in  OTHER_MODS:
-        mod_path = mod_name + '.cpp'
+        mod_path = mod_name.replace('.', '/') + '.cpp'
         ext_modules.append(
             Extension(mod_name,
                       sources=[mod_path],
@@ -165,13 +151,14 @@ def setup_package():
 
     with chdir(root):
         generate_cython(root)
-        ext_modules = generate_extensions()
+        ext_modules = generate_extensions(root)
         setup(
             name="_rgf",
             packages=PACKAGES,
             package_data={'': ['*.pyx', '*.pxd']},
             ext_modules=ext_modules,
         )
+
 
 if __name__ == '__main__':
     setup_package()

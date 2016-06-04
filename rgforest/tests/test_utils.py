@@ -1,4 +1,9 @@
+import os
 import numpy as np
+
+
+TEST_DIR = os.path.abspath(os.path.dirname(__file__))
+
 
 def get_test_data(n_train=1000, n_test=500, n_features=10, n_categoricals=0,
                   n_classes=2, classification=True, random_seed=1234):
@@ -48,3 +53,7 @@ def get_test_data(n_train=1000, n_test=500, n_features=10, n_categoricals=0,
             X = np.hstack((X, rng.choice(range(10), n_samples)[:, np.newaxis]))
 
     return (X[:n_train], y[:n_train]), (X[n_train:], y[n_train:])
+
+
+def get_fixture_path(fixture_name):
+    return os.path.join(TEST_DIR, 'fixtures', fixture_name)

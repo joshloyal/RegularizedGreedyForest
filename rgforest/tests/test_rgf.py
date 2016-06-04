@@ -4,7 +4,8 @@ import os
 import sklearn.metrics as metrics
 
 import rgforest as rgf
-from rgforest.tests.test_utils import get_test_data
+from rgforest.tests.test_utils import get_test_data, get_fixture_path
+
 
 module_rng = np.random.RandomState(1234)
 
@@ -59,7 +60,7 @@ class TestRegularizedGreedyForest(object):
 
         y_pred = est.predict(X_train)
 
-        fixture_name = 'tests/fixtures/rgf_classification_regression.npy'
+        fixture_name = get_fixture_path('rgf_classification_regression.npy')
         saved_preds = np.loadtxt(fixture_name)
         np.testing.assert_allclose(y_pred, saved_preds)
 
@@ -99,7 +100,7 @@ class TestRegularizedGreedyForest(object):
 
         y_pred = est.predict(X_train)
 
-        fixture_name = 'tests/fixtures/rgf_regression_regression.npy'
+        fixture_name = get_fixture_path('rgf_regression_regression.npy')
         saved_preds = np.loadtxt(fixture_name)
         np.testing.assert_allclose(y_pred, saved_preds)
 
