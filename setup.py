@@ -15,6 +15,7 @@ PACKAGES = [
 
 RGF_MODS = [
     'rgforest._rgf',
+    'rgforest._rgftree',
     'rgforest.dataset']
 
 

@@ -1,4 +1,5 @@
-from dataset cimport AzSmat, AzDvect, AzSvFeatInfoClone
+from .dataset cimport AzSmat, AzDvect, AzSvFeatInfoClone
+from ._rgftree cimport AzTree
 
 cdef extern from "AzTETselector.hpp":
     cdef cppclass AzTETselector:
@@ -46,28 +47,6 @@ cdef extern from  "AzOut.hpp":
 cdef extern from "AzSvFeatInfo.hpp":
     cdef cppclass AzSvFeatInfo:
         pass
-
-cdef extern from "AzTreeNodes.hpp":
-    cdef cppclass AzTreeNodes:
-        pass
-
-
-cdef extern from "AzTreeNodes.hpp":
-    cdef cppclass AzTreeNode:
-        int fx
-        int le_nx
-        int gt_nx
-        double border_val
-
-
-cdef extern from "AzTree.hpp":
-    cdef cppclass AzTree:
-        AzTree()
-        void copy_from(const AzTreeNodes *tree_nodes)
-        const AzTreeNode *node(int nx)
-        int nodeNum()
-        int leafNum()
-
 
 cdef extern from "AzTreeEnsemble.hpp":
     cdef cppclass AzTreeEnsemble:
