@@ -66,6 +66,7 @@ cdef extern from "AzTree.hpp":
         void copy_from(const AzTreeNodes *tree_nodes)
         const AzTreeNode *node(int nx)
         int nodeNum()
+        int leafNum()
 
 
 cdef extern from "AzTreeEnsemble.hpp":

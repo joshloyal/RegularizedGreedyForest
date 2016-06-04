@@ -47,6 +47,7 @@ cdef Node _to_node(const AzTreeNode *tree_node) nogil:
 
 cdef class RGFTree:
     cdef public int node_count
+    cdef public SIZE_t n_outputs
     cdef Node* nodes
     def __cinit__(self):
         self.node_count = 0
@@ -63,11 +64,13 @@ cdef class RGFTree:
     def __getstate__(self):
         d = {}
         d["node_count"] = self.node_count
+        d["n_outputs"] = self.n_outputs
         d["nodes"] = self._get_node_ndarray()
         return d
 
     def __setstate__(self, d):
         self.node_count = d["node_count"]
+        self.n_outputs = d["n_outputs"]
 
         if 'nodes' not in d:
             raise ValueError("You have loaded a RGFTree version which ",
@@ -97,6 +100,7 @@ cdef class RGFTree:
     cdef copy_from(self, const AzTree *tree):
         cdef int node_idx
         self.node_count = tree.nodeNum()
+        self.n_outputs = tree.leafNum()
 
         self.nodes = <Node*>realloc(self.nodes, sizeof(Node) * self.node_count)
         if self.nodes is NULL:

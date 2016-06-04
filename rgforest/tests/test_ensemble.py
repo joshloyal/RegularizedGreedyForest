@@ -20,6 +20,8 @@ class TestRGFTreeEnsemble(object):
         assert len(self.ensemble) == len([tree for tree in self.ensemble])
 
         tree = self.ensemble[0]
+        tree.node_count
+        tree.n_outputs
         tree.children_left
         tree.children_right
         tree.feature
@@ -38,6 +40,7 @@ class TestRGFTreeEnsemble(object):
             os.remove(file_name)
 
         assert unpickle_tree.node_count == tree.node_count
+        assert unpickle_tree.n_outputs == tree.n_outputs
         np.testing.assert_allclose(unpickle_tree.children_left, tree.children_left)
         np.testing.assert_allclose(unpickle_tree.children_right, tree.children_right)
         np.testing.assert_allclose(unpickle_tree.feature, tree.feature)
