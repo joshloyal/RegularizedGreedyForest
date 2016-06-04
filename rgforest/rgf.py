@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
-from ._rgf import RGFBuilder, RGFTreeEnsemble
+from ._ensemble import RGFBuilder, RGFTreeEnsemble
 
 
 def check_weight(sample_weight):

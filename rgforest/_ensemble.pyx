@@ -9,7 +9,7 @@ cimport numpy as np
 np.import_array()
 
 from rgforest.dataset cimport RGFMatrix
-from rgforest._rgftree cimport RGFTree
+from rgforest._tree cimport RGFTree
 cimport rgforest._memory as mem
 
 

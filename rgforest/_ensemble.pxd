@@ -1,5 +1,5 @@
 from .dataset cimport AzSmat, AzDvect, AzSvFeatInfoClone
-from ._rgftree cimport AzTree
+from ._tree cimport AzTree
 
 cdef extern from "AzTETselector.hpp":
     cdef cppclass AzTETselector:
