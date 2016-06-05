@@ -1,6 +1,8 @@
-import numpy as np
 import os
+import cPickle as pickle
 
+import tempfile
+import numpy as np
 import sklearn.metrics as metrics
 
 import rgforest as rgf
@@ -104,13 +106,37 @@ class TestRegularizedGreedyForest(object):
         saved_preds = np.loadtxt(fixture_name)
         np.testing.assert_allclose(y_pred, saved_preds)
 
-    def test_save_model(self):
+    def test_pickle_classifier(self):
         (X_train, y_train), (X_test, y_test) = get_test_data()
         est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train)
 
-        file_name = 'test_model'
+        y_pred = est.predict_proba(X_test)
+        with tempfile.NamedTemporaryFile('wr') as tfile:
+            file_name = tfile.name
+
         try:
-            est.save(file_name)
+            pickle.dump(est, open(file_name, 'wb'))
+            unpickle_est = pickle.load(open(file_name, 'rb'))
+            unpickle_y_pred = unpickle_est.predict_proba(X_test)
+            np.testing.assert_allclose(y_pred, unpickle_y_pred)
+        finally:
+            os.remove(file_name)
+
+    def test_pickle_regressor(self):
+        (X_train, y_train), (X_test, y_test) = get_test_data(classification=False)
+        est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+        est.fit(X_train, y_train)
+
+        y_pred = est.predict(X_test)
+
+        with tempfile.NamedTemporaryFile('wr') as tfile:
+            file_name = tfile.name
+
+        try:
+            pickle.dump(est, open(file_name, 'wb'))
+            unpickle_est = pickle.load(open(file_name, 'rb'))
+            unpickle_y_pred = unpickle_est.predict(X_test)
+            np.testing.assert_allclose(y_pred, unpickle_y_pred)
         finally:
             os.remove(file_name)

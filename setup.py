@@ -129,7 +129,7 @@ def generate_extensions(root):
         ext_modules.append(
             Extension(mod_name,
                       sources=[mod_path] + get_rgf_sources(root),
-                      include_dirs=get_rgf_includes(root) + [numpy.get_include()],
+                      include_dirs=[os.path.join(root, 'rgforest')] + get_rgf_includes(root) + [numpy.get_include()],
                       extra_compile_args=['-O3', '-fPIC'],
                       language='c++'))
 

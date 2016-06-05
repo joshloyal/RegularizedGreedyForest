@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.special import expit
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
 from rgforest._ensemble import RGFTreeEnsemble
@@ -32,10 +33,6 @@ class RegularizedGreedyForestEstimator(BaseEstimator):
     def predict(self, X):
         return self.ensemble.predict(X)
 
-    def save(self, file_name):
-        self.ensemble.save(file_name)
-
-
 class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
                                         ClassifierMixin):
     def __init__(self, max_leaf_nodes=500, l2=1,  loss='Log',
@@ -59,7 +56,8 @@ class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
         return (y > 0.5).astype(np.int32)
 
     def predict_proba(self, X):
-        return self.ensemble.predict(X)
+        """ we want positive probabilities. unsure what exactly rgf does """
+        return expit(2 * self.ensemble.predict(X))  # 1. / (1 + np.exp(-2 * self.ensemble.predict(X)))
 
     def predict(self, X):
         y_proba = self.predict_proba(X)

@@ -98,6 +98,10 @@ cdef class RGFBuilder:
                         break
             # (maybe the want to preserve the old one?)
             forest.copy_to(ens)
+
+            # set additional variables used for unpickling
+            ensemble.end_training()
+
         finally:
             del rgf_matrix
             del forest

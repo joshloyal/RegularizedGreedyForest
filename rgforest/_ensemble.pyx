@@ -1,9 +1,13 @@
+from cython.operator cimport dereference as deref
+from libc.stdlib cimport malloc, free
+from libc.string cimport memcpy
+
 import numpy as np
 cimport numpy as np
 np.import_array()
 
 
-from rgforest._tree cimport RGFTree
+from rgforest._tree cimport RGFTree, Node
 cimport rgforest._memory as mem
 
 
@@ -17,6 +21,57 @@ cdef class RGFTreeEnsemble:
     def __dealloc__(self):
         if self.ensemble is not NULL:
             del self.ensemble
+
+    def __reduce__(self):
+        return (RGFTreeEnsemble, (), self.__getstate__())
+
+    def __getstate__(self):
+        d = {}
+        d["n_trees"] = self.n_trees
+        d["constant"] = self.constant
+        d["org_dim"] = self.org_dim
+        d["signature"] = self.signature
+        d["configuration"] = self.configuration
+        d["trees"] = [tree for tree in self]
+        return d
+
+    def __setstate__(self, d):
+        self.n_trees = d["n_trees"]
+        self.constant = d["constant"]
+        self.org_dim = d["org_dim"]
+        self.signature = d["signature"]
+        self.configuration = d["configuration"]
+
+        self._rebuild_ensemble(d["trees"])
+
+    cdef _rebuild_ensemble(self, list trees):
+        # create an array of AzTrees
+        cdef AzTree **inp_trees = <AzTree**>malloc(sizeof(AzTree*) * self.n_trees)
+        cdef AzTree *inp_tree
+        cdef Node *nodes
+        for tree_idx, tree in enumerate(trees):
+            # we sadly need to allocate another node array...
+            node_ndarray = tree.nodes
+            nodes = <Node*>malloc(<SIZE_t> node_ndarray.shape[0] * sizeof(Node))
+            if nodes is NULL:
+                raise MemoryError('Could not allocate Nodes')
+            memcpy(nodes, (<np.ndarray> node_ndarray).data,
+                   <SIZE_t> node_ndarray.shape[0] * sizeof(Node))
+
+            inp_tree = new AzTree(tree.root, tree.node_count, nodes)
+            inp_trees[tree_idx] = inp_tree
+
+        try:
+            self.ensemble = new AzTreeEnsemble()
+            self.ensemble.transfer_from(inp_trees,
+                                        <int>self.n_trees,
+                                        <double>self.constant,
+                                        <int>self.org_dim,
+                                        self.configuration,
+                                        self.signature)
+        finally:
+            free(inp_trees)
+            free(nodes)
 
     def __iter__(self):
         cdef int n_trees = self.ensemble.size()
@@ -54,5 +109,9 @@ cdef class RGFTreeEnsemble:
         finally:
             del m_test_x
 
-    cpdef save(self, bytes file_name):
-        self.ensemble.write(file_name)
+    cdef end_training(self):
+        self.n_trees = self.ensemble.size()
+        self.org_dim = self.ensemble.orgdim()
+        self.constant = self.ensemble.constant()
+        self.signature = self.ensemble.signature()
+        self.configuration = self.ensemble.configuration()
