@@ -1,8 +1,8 @@
 import numpy as np
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
-from ._ensemble import RGFBuilder, RGFTreeEnsemble
-
+from rgforest._ensemble import RGFTreeEnsemble
+from rgforest._builder import RGFBuilder
 
 def check_weight(sample_weight):
     if np.any(sample_weight == 0):

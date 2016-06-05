@@ -14,8 +14,9 @@ PACKAGES = [
 
 
 RGF_MODS = [
-    'rgforest._ensemble',
     'rgforest._tree',
+    'rgforest._ensemble',
+    'rgforest._builder',
     'rgforest.dataset']
 
 
