@@ -47,6 +47,9 @@ cdef class RGFTreeEnsemble:
     cdef _rebuild_ensemble(self, list trees):
         # create an array of AzTrees
         cdef AzTree **inp_trees = <AzTree**>malloc(sizeof(AzTree*) * self.n_trees)
+        if inp_trees is NULL:
+            raise MemoryError("Could not allocate inp_trees")
+
         cdef AzTree *inp_tree
         cdef Node *nodes
         for tree_idx, tree in enumerate(trees):
@@ -60,7 +63,7 @@ cdef class RGFTreeEnsemble:
 
             inp_tree = new AzTree(tree.root, tree.node_count, nodes)
             inp_trees[tree_idx] = inp_tree
-
+            free(nodes)
         try:
             self.ensemble = new AzTreeEnsemble()
             self.ensemble.transfer_from(inp_trees,
@@ -70,8 +73,9 @@ cdef class RGFTreeEnsemble:
                                         self.configuration,
                                         self.signature)
         finally:
+            for tree_idx in range(self.n_trees):
+                free(inp_trees[tree_idx])
             free(inp_trees)
-            free(nodes)
 
     def __iter__(self):
         cdef int n_trees = self.ensemble.size()
