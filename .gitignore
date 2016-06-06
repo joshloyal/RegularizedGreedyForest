@@ -6,3 +6,7 @@ __pycache__
 *.cache
 *.cpp
 build
+MANIFEST
+dist
+rgforest/rgfpackage/bin
+rgforest/rgfpackage/test
