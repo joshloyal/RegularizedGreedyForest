@@ -156,6 +156,7 @@ def setup_package():
         ext_modules = generate_extensions(root)
         setup(
             name="rgforest",
+            version='0.1.0',
             packages=PACKAGES,
             package_data={'': ['*.pyx', '*.pxd']},
             ext_modules=ext_modules,
