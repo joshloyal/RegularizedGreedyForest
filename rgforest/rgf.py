@@ -11,7 +11,7 @@ def check_weight(sample_weight):
 
 
 class RegularizedGreedyForestEstimator(BaseEstimator):
-    def __init__(self, max_leaf_nodes=500, l2=1,  loss='LS',
+    def __init__(self, max_leaf_nodes=500, l2=0.01,  loss='LS',
                  test_interval=100, verbose=False):
         self.max_leaf_nodes = max_leaf_nodes
         self.l2 = l2
@@ -23,6 +23,8 @@ class RegularizedGreedyForestEstimator(BaseEstimator):
 
     def _fit(self, X, y, sample_weight=None):
         check_weight(sample_weight)
+        # need to check X is c-contigous!
+
         builder = RGFBuilder(self.max_leaf_nodes, self.l2, self.loss,
                              self.test_interval, self.verbose)
         builder.build(self.ensemble, X, y, sample_weight)
@@ -35,7 +37,7 @@ class RegularizedGreedyForestEstimator(BaseEstimator):
 
 class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
                                         ClassifierMixin):
-    def __init__(self, max_leaf_nodes=500, l2=1,  loss='Log',
+    def __init__(self, max_leaf_nodes=500, l2=0.01,  loss='Log',
                  test_interval=100, verbose=0):
         super(RegularizedGreedyForestClassifier, self).__init__(
             max_leaf_nodes=max_leaf_nodes,
@@ -67,7 +69,7 @@ class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
 class RegularizedGreedyForestRegressor(RegularizedGreedyForestEstimator,
                                        RegressorMixin):
 
-    def __init__(self, max_leaf_nodes=500, l2=1,
+    def __init__(self, max_leaf_nodes=500, l2=0.01,
                  test_interval=100, verbose=0):
         super(RegularizedGreedyForestRegressor, self).__init__(
             max_leaf_nodes=max_leaf_nodes,
