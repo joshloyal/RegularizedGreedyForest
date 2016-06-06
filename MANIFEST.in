@@ -1,0 +1,5 @@
+global-include *.hpp
+global-include *.cpp
+
+global-exclude *.pyo
+global-exclude *.pyc
