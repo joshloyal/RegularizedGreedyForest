@@ -4,6 +4,7 @@ from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
 from rgforest._ensemble import RGFTreeEnsemble
 from rgforest._builder import RGFBuilder
+from rgforest.exceptions import NotFittedError
 
 def check_weight(sample_weight):
     if np.any(sample_weight == 0):
@@ -19,11 +20,14 @@ class RegularizedGreedyForestEstimator(BaseEstimator):
         self.test_interval = test_interval
         self.verbose = verbose
 
-        self.ensemble = RGFTreeEnsemble()
+        self.ensemble = None
 
     def _fit(self, X, y, sample_weight=None):
         check_weight(sample_weight)
         # need to check X is c-contigous!
+
+        if self.ensemble is None:
+            self.ensemble = RGFTreeEnsemble()
 
         builder = RGFBuilder(self.max_leaf_nodes, self.l2, self.loss,
                              self.test_interval, self.verbose)
@@ -32,7 +36,14 @@ class RegularizedGreedyForestEstimator(BaseEstimator):
     def fit(self, X, y, sample_weight=None):
         self._fit(X, y, sample_weight)
 
+    def _validate_X_predict(self, X):
+        if self.ensemble is None or len(self.ensemble) == 0:
+            raise NotFittedError("Estimator not fitted, "
+                                 "all `fit` before exploiting the model.")
+        return X
+
     def predict(self, X):
+        X = self._validate_X_predict(X)
         return self.ensemble.predict(X)
 
 class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
@@ -59,6 +70,7 @@ class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
 
     def predict_proba(self, X):
         """ we want positive probabilities. unsure what exactly rgf does """
+        X = self._validate_X_predict(X)
         return expit(2 * self.ensemble.predict(X))  # 1. / (1 + np.exp(-2 * self.ensemble.predict(X)))
 
     def predict(self, X):

@@ -1,13 +1,14 @@
 import os
 import cPickle as pickle
 
-import tempfile
 import numpy as np
+import pytest
 import sklearn.metrics as metrics
+import tempfile
 
 import rgforest as rgf
 from rgforest.tests.test_utils import get_test_data, get_fixture_path
-
+from rgforest.exceptions import NotFittedError
 
 module_rng = np.random.RandomState(1234)
 
@@ -140,3 +141,19 @@ class TestRegularizedGreedyForest(object):
             np.testing.assert_allclose(y_pred, unpickle_y_pred)
         finally:
             os.remove(file_name)
+
+    def test_not_fitted_classifier(self):
+        (X_train, y_train), (X_test, y_test) = get_test_data()
+        est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
+
+        with pytest.raises(NotFittedError):
+            est.predict_proba(X_test)
+
+        with pytest.raises(NotFittedError):
+            est.predict(X_test)
+
+    def test_not_fitted_regressor(self):
+        (X_train, y_train), (X_test, y_test) = get_test_data()
+        est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+        with pytest.raises(NotFittedError):
+            est.predict(X_test)
