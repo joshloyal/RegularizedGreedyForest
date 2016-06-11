@@ -20,20 +20,21 @@ class TestRGFMatrix(object):
         assert rgf_matrix.n_samples == n_samples
 
         np.testing.assert_allclose(rgf_matrix.sum_features(), n_features * n_samples)
-        def test_dataset_ones_long(self):
-            n_features = 10
-            n_samples = 100
 
-            X = np.ones((n_samples, n_features)).astype(np.float64)
-            y = module_rng.choice([1, -1], n_samples).astype(np.float64)
-            rgf_matrix = dataset.RGFMatrix(X, y)
-            del X
-            del y
+    def test_dataset_ones_long(self):
+        n_features = 10
+        n_samples = 100
 
-            assert rgf_matrix.n_features == n_features
-            assert rgf_matrix.n_samples == n_samples
+        X = np.ones((n_samples, n_features)).astype(np.float64)
+        y = module_rng.choice([1, -1], n_samples).astype(np.float64)
+        rgf_matrix = dataset.RGFMatrix(X, y)
+        del X
+        del y
 
-            np.testing.assert_allclose(rgf_matrix.sum_features(), n_features * n_samples)
+        assert rgf_matrix.n_features == n_features
+        assert rgf_matrix.n_samples == n_samples
+
+        np.testing.assert_allclose(rgf_matrix.sum_features(), n_features * n_samples)
 
     def test_dataset_ones_equal(self):
         n_features = 10

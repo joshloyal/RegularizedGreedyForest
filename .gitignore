@@ -14,3 +14,4 @@ rgforest/rgfpackage/test
 *.coverage
 rgfpackage/bin/
 rgfpackage/test/
+htmlcov/
