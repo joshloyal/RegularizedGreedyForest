@@ -4,8 +4,7 @@ import sys
 import contextlib
 
 import numpy
-from distutils.core import Extension
-from distutils.core import setup
+from setuptools import Extension, setup
 
 
 PACKAGES = [
