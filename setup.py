@@ -160,6 +160,11 @@ def setup_package():
         setup(
             name="rgforest",
             version='0.1.0',
+            description='Cython Wrapper around the Regularized Greedy Forest Algorithm',
+            author='Joshua D. Loyal',
+            url='https://github.com/joshloyal/RegularizedGreedyForest',
+            license='MIT',
+            install_requires=['numpy', 'scipy', 'scikit-learn'],
             packages=PACKAGES,
             package_data={'': ['rgforest/*.pyx', 'rgforest/*.pxd']},
             ext_modules=ext_modules,
