@@ -1,0 +1,4 @@
+cython<0.24
+numpy>=1.7
+scipy>=0.10
+scikit-learn>=0.15.1

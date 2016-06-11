@@ -10,3 +10,7 @@ MANIFEST
 dist
 rgforest/rgfpackage/bin
 rgforest/rgfpackage/test
+*.tox
+*.coverage
+rgfpackage/bin/
+rgfpackage/test/

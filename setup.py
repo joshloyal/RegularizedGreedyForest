@@ -23,8 +23,11 @@ RGF_MODS = [
 OTHER_MODS = ['rgforest._memory']
 
 
-RGF_DIR = os.path.join('rgforest', 'rgfpackage')
+RGF_DIR = 'rgfpackage'
 
+
+def get_python_package(root):
+    return os.path.join(root, 'rgforest')
 
 def get_rgf_directory(root):
     return os.path.join(root, RGF_DIR)
@@ -105,7 +108,7 @@ def generate_sources(root):
 
 def generate_cython(root):
     print("Cythonizing sources")
-    for source in generate_sources(root):
+    for source in generate_sources(get_python_package(root)):
         cythonize_source(source)
 
 
@@ -158,7 +161,7 @@ def setup_package():
             name="rgforest",
             version='0.1.0',
             packages=PACKAGES,
-            package_data={'': ['*.pyx', '*.pxd']},
+            package_data={'': ['rgforest/*.pyx', 'rgforest/*.pxd']},
             ext_modules=ext_modules,
         )
 

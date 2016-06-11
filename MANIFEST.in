@@ -1,5 +1,9 @@
-global-include *.hpp
-global-include *.cpp
+recursive-include rgfpackage *.cpp *.hpp
+recursive-include rgforest *.cpp *.pyx *.pxd
+recursive-include rgforest/tests/fixtures *
 
-global-exclude *.pyo
-global-exclude *.pyc
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+include README.md
+include requirements.txt
