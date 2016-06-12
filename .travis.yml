@@ -18,3 +18,7 @@ script:
 
 after_success:
   - coveralls || echo "Coveralls upload failed"
+
+branches:
+  only:
+    - master
