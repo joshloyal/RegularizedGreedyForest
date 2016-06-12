@@ -2,4 +2,8 @@
 set -e
 
 # run tests
-py.test rgforest
+if [[ "$COVERAGE" == "true" ]]; then
+    py.test --cov=rgforest --cov-report=term --cov-report=html -s rgforest
+else
+    py.test -s rgforest
+fi
