@@ -6,7 +6,7 @@ language: python
 matrix:
   include:
     - python: 2.7
-      env: TEST_MODE=TESTS
+      env: TEST_MODE=TESTS COVERAGE=true
     #- python: 2.7
     #  env: TEST_MODE=PEP8
 
@@ -16,8 +16,5 @@ install:
 script:
   bash build_tools/test_script.sh
 
-#after_success:
-#    # Report coverage results to codecov.io
-#    # and export tox environment variables
-#    - pip install codecov
-#    - codecov -e TOX_ENV TRAVIS_OS_NAME
+after_success:
+  - coveralls || echo "Coveralls upload failed"

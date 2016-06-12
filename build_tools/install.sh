@@ -24,7 +24,13 @@ conda info -a
 # install dependencies
 conda create -q -n testvenv python=$TRAVIS_PYTHON_VERSION numpy scipy cython scikit-learn pytest
 source activate testvenv
-pip install pytest-cov
+pip install pytest-xdist
+
+# if we also need to generate a coverage report
+if [[ "$COVERAGE" == "true" ]]; then
+    #pip install pytest-cov python-coveralls coverage==3.7.1
+    pip install pytest-cov coverage coveralls
+fi
 
 # install package
 python --version
