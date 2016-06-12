@@ -1,10 +1,14 @@
 import numpy as np
-from scipy.special import expit
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 
 from rgforest._ensemble import RGFTreeEnsemble
 from rgforest._builder import RGFBuilder
 from rgforest.exceptions import NotFittedError
+
+
+def expit(x):
+    return 1. / (1. + np.exp(-x))
+
 
 def check_weight(sample_weight):
     if np.any(sample_weight == 0):
@@ -71,7 +75,7 @@ class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
     def predict_proba(self, X):
         """ we want positive probabilities. unsure what exactly rgf does """
         X = self._validate_X_predict(X)
-        return expit(2 * self.ensemble.predict(X))  # 1. / (1 + np.exp(-2 * self.ensemble.predict(X)))
+        return expit(2 * self.ensemble.predict(X))
 
     def predict(self, X):
         y_proba = self.predict_proba(X)

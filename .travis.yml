@@ -4,19 +4,20 @@ sudo: false
 language: python
 
 matrix:
-    include:
-      - python: 2.7
-        env: TOX_ENV=py27
-      - pythone: 2.7
-        env: TOX_ENV=flake8
-
-script: tox -e $TOX_ENV
+  include:
+    - python: 2.7
+      env: TEST_MODE=TESTS
+    #- python: 2.7
+    #  env: TEST_MODE=PEP8
 
 install:
-    - pip install tox
+  source build_tools/install.sh
 
-after_success:
-    # Report coverage results to codecov.io
-    # and export tox environment variables
-    - pip install codecov
-    - codecov -e TOX_ENV TRAVIS_OS_NAME
+script:
+  bash build_tools/test_script.sh
+
+#after_success:
+#    # Report coverage results to codecov.io
+#    # and export tox environment variables
+#    - pip install codecov
+#    - codecov -e TOX_ENV TRAVIS_OS_NAME
