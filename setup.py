@@ -4,6 +4,8 @@ import sys
 import contextlib
 
 import numpy
+
+from Cython.Compiler.Options import directive_defaults
 from setuptools import Extension, setup
 
 
@@ -105,16 +107,18 @@ def generate_sources(root):
                 yield os.path.join(base, filename)
 
 
-def generate_cython(root):
+def generate_cython(root, cython_cov=False):
     print("Cythonizing sources")
     for source in generate_sources(get_python_package(root)):
-        cythonize_source(source)
+        cythonize_source(source, cython_cov)
 
 
-def cythonize_source(source):
+def cythonize_source(source, cython_cov=False):
     print("Processing %s" % source)
 
     flags = ['--fast-fail', '--cplus']
+    if cython_cov:
+        flags.extend(['--directive', 'linetrace=True'])
 
     try:
         p = subprocess.call(['cython'] + flags + [source])
@@ -124,7 +128,7 @@ def cythonize_source(source):
         raise OSError('Cython needs to be installed')
 
 
-def generate_extensions(root):
+def generate_extensions(root, macros=[]):
     ext_modules = []
     for mod_name in RGF_MODS:
         mod_path = mod_name.replace('.', '/') + '.cpp'
@@ -133,6 +137,7 @@ def generate_extensions(root):
                       sources=[mod_path] + get_rgf_sources(root),
                       include_dirs=[os.path.join(root, 'rgforest')] + get_rgf_includes(root) + [numpy.get_include()],
                       extra_compile_args=['-O3', '-fPIC'],
+                      define_macros=macros,
                       language='c++'))
 
     for mod_name in  OTHER_MODS:
@@ -142,6 +147,7 @@ def generate_extensions(root):
                       sources=[mod_path],
                       include_dirs=[numpy.get_include()],
                       extra_compile_args=['-O3', '-fPIC'],
+                      define_macros=macros,
                       language='c++'))
 
     return ext_modules
@@ -153,9 +159,16 @@ def setup_package():
     if len(sys.argv) > 1 and sys.argv[1] == 'clean':
         return clean(root)
 
+    cython_cov = 'CYTHON_COV' in os.environ
+
+    macros = []
+    if cython_cov:
+        print("Adding coverage information to cythonized files.")
+        macros =  [('CYTHON_TRACE_NOGIL', 1)]
+
     with chdir(root):
-        generate_cython(root)
-        ext_modules = generate_extensions(root)
+        generate_cython(root, cython_cov)
+        ext_modules = generate_extensions(root, macros=macros)
         setup(
             name="rgforest",
             version='0.1.0',
