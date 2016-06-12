@@ -159,8 +159,7 @@ def setup_package():
     if len(sys.argv) > 1 and sys.argv[1] == 'clean':
         return clean(root)
 
-    if 'CYTHON_COV' in os.environ:
-        cython_cov = True
+    cython_cov = 'CYTHON_COV' in os.environ
 
     macros = []
     if cython_cov:
