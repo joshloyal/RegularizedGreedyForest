@@ -5,3 +5,4 @@ plugins= Cython.Coverage
 
 omit =
     */setup.py
+    */*.pxd
