@@ -1,5 +1,7 @@
 [run]
 branch = True
 source = rgforest
+plugins= Cython.Coverage
+
 omit =
     */setup.py
