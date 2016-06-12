@@ -33,7 +33,7 @@ if [[ "$COVERAGE" == "true" ]]; then
 fi
 
 # flake8
-if [[ "$TEST_MODE" == "FLAKE8"]]; then
+if [[ "$TEST_MODE" == "FLAKE8" ]]; then
     pip install pytest-flake8
 fi
 
