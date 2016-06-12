@@ -32,6 +32,11 @@ if [[ "$COVERAGE" == "true" ]]; then
     pip install pytest-cov coverage coveralls
 fi
 
+# flake8
+if [[ "$TEST_MODE" == "FLAKE8" ]]; then
+    pip install pytest-flake8
+fi
+
 # install package
 python --version
 python -c "import numpy; print('numpy %s' % numpy.__version__)"

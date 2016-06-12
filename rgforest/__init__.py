@@ -1,3 +1,5 @@
-__all__ = ['RegularizedGreedyForestClassifier', 'RegularizedGreedyForestRegressor']
+from .rgf import RegularizedGreedyForestClassifier
+from .rgf import RegularizedGreedyForestRegressor
 
-from .rgf import RegularizedGreedyForestClassifier, RegularizedGreedyForestRegressor
+__all__ = ['RegularizedGreedyForestClassifier',
+           'RegularizedGreedyForestRegressor']

@@ -17,7 +17,8 @@ class TestRegularizedGreedyForest(object):
     """Test suite for regularized greedy forest """
     def test_train_classification(self):
         (X_train, y_train), (X_test, y_test) = get_test_data()
-        est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
+        est = rgf.RegularizedGreedyForestClassifier(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train)
 
         y_pred = est.predict(X_train)
@@ -32,13 +33,13 @@ class TestRegularizedGreedyForest(object):
         test_score = metrics.roc_auc_score(y_test, y_proba)
         assert test_score > 0.75
 
-
     def test_train_classification_weighted(self):
         (X_train, y_train), (X_test, y_test) = get_test_data()
         sample_weight = np.ones_like(y_train)
         sample_weight[y_train == 0] = 0.5
 
-        est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
+        est = rgf.RegularizedGreedyForestClassifier(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train, sample_weight)
 
         y_pred = est.predict(X_train)
@@ -58,7 +59,8 @@ class TestRegularizedGreedyForest(object):
         sample_weight = np.ones_like(y_train)
         sample_weight[y_train == 0] = 0.5
 
-        est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
+        est = rgf.RegularizedGreedyForestClassifier(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train, sample_weight)
 
         y_pred = est.predict(X_train)
@@ -68,8 +70,10 @@ class TestRegularizedGreedyForest(object):
         np.testing.assert_allclose(y_pred, saved_preds)
 
     def test_train_regression(self):
-        (X_train, y_train), (X_test, y_test) = get_test_data(classification=False)
-        est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+        (X_train, y_train), (X_test, y_test) = get_test_data(
+            classification=False)
+        est = rgf.RegularizedGreedyForestRegressor(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train)
 
         y_pred = est.predict(X_train)
@@ -81,11 +85,13 @@ class TestRegularizedGreedyForest(object):
         assert test_score < 2
 
     def test_train_regression_weighted(self):
-        (X_train, y_train), (X_test, y_test) = get_test_data(classification=False)
+        (X_train, y_train), (X_test, y_test) = get_test_data(
+            classification=False)
         sample_weight = np.ones_like(y_train)
         sample_weight[y_train < 0] = 0.5
 
-        est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+        est = rgf.RegularizedGreedyForestRegressor(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train, sample_weight)
 
         y_pred = est.predict(X_train)
@@ -97,8 +103,10 @@ class TestRegularizedGreedyForest(object):
         assert test_score < 2
 
     def test_train_regression_regression(self):
-        (X_train, y_train), (X_test, y_test) = get_test_data(classification=False)
-        est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+        (X_train, y_train), (X_test, y_test) = get_test_data(
+            classification=False)
+        est = rgf.RegularizedGreedyForestRegressor(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train)
 
         y_pred = est.predict(X_train)
@@ -109,7 +117,8 @@ class TestRegularizedGreedyForest(object):
 
     def test_pickle_classifier(self):
         (X_train, y_train), (X_test, y_test) = get_test_data()
-        est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
+        est = rgf.RegularizedGreedyForestClassifier(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train)
 
         y_pred = est.predict_proba(X_test)
@@ -125,8 +134,10 @@ class TestRegularizedGreedyForest(object):
             os.remove(file_name)
 
     def test_pickle_regressor(self):
-        (X_train, y_train), (X_test, y_test) = get_test_data(classification=False)
-        est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+        (X_train, y_train), (X_test, y_test) = get_test_data(
+            classification=False)
+        est = rgf.RegularizedGreedyForestRegressor(
+            l2=0.01, max_leaf_nodes=500)
         est.fit(X_train, y_train)
 
         y_pred = est.predict(X_test)
@@ -144,7 +155,8 @@ class TestRegularizedGreedyForest(object):
 
     def test_not_fitted_classifier(self):
         (X_train, y_train), (X_test, y_test) = get_test_data()
-        est = rgf.RegularizedGreedyForestClassifier(l2=0.01, max_leaf_nodes=500)
+        est = rgf.RegularizedGreedyForestClassifier(
+            l2=0.01, max_leaf_nodes=500)
 
         with pytest.raises(NotFittedError):
             est.predict_proba(X_test)
@@ -154,6 +166,7 @@ class TestRegularizedGreedyForest(object):
 
     def test_not_fitted_regressor(self):
         (X_train, y_train), (X_test, y_test) = get_test_data()
-        est = rgf.RegularizedGreedyForestRegressor(l2=0.01, max_leaf_nodes=500)
+        est = rgf.RegularizedGreedyForestRegressor(
+            l2=0.01, max_leaf_nodes=500)
         with pytest.raises(NotFittedError):
             est.predict(X_test)

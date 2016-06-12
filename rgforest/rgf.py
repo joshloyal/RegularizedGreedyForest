@@ -50,6 +50,7 @@ class RegularizedGreedyForestEstimator(BaseEstimator):
         X = self._validate_X_predict(X)
         return self.ensemble.predict(X)
 
+
 class RegularizedGreedyForestClassifier(RegularizedGreedyForestEstimator,
                                         ClassifierMixin):
     def __init__(self, max_leaf_nodes=500, l2=0.01,  loss='Log',
