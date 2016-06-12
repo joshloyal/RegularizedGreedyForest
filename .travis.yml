@@ -7,8 +7,8 @@ matrix:
   include:
     - python: 2.7
       env: TEST_MODE=TESTS COVERAGE=true
-    #- python: 2.7
-    #  env: TEST_MODE=PEP8
+    - python: 2.7
+      env: TEST_MODE=FLAKE8
 
 install:
   source build_tools/install.sh
