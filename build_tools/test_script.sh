@@ -3,9 +3,9 @@ set -e
 
 # run tests
 if [[ "$COVERAGE" == "true" ]]; then
-    py.test --cov=rgforest --cov-report=term --cov-report=html -s rgforest
+    py.test --cov=rgforest --cov-report=term --cov-report=html -s -v rgforest
 elif [[ "$TESTMODE" == "FLAKE8" ]]; then
-    py.test --flake8 rgforest
+    py.test --flake8 -v rgforest
 else
-    py.test -s rgforest
+    py.test -s -v rgforest
 fi

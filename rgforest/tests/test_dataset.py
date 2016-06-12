@@ -19,7 +19,8 @@ class TestRGFMatrix(object):
         assert rgf_matrix.n_features == n_features
         assert rgf_matrix.n_samples == n_samples
 
-        np.testing.assert_allclose(rgf_matrix.sum_features(), n_features * n_samples)
+        np.testing.assert_allclose(
+            rgf_matrix.sum_features(), n_features * n_samples)
 
     def test_dataset_ones_long(self):
         n_features = 10
@@ -34,7 +35,8 @@ class TestRGFMatrix(object):
         assert rgf_matrix.n_features == n_features
         assert rgf_matrix.n_samples == n_samples
 
-        np.testing.assert_allclose(rgf_matrix.sum_features(), n_features * n_samples)
+        np.testing.assert_allclose(
+            rgf_matrix.sum_features(), n_features * n_samples)
 
     def test_dataset_ones_equal(self):
         n_features = 10
@@ -49,7 +51,8 @@ class TestRGFMatrix(object):
         assert rgf_matrix.n_features == n_features
         assert rgf_matrix.n_samples == n_samples
 
-        np.testing.assert_allclose(rgf_matrix.sum_features(), n_features * n_samples)
+        np.testing.assert_allclose(
+            rgf_matrix.sum_features(), n_features * n_samples)
 
     def test_dataset_random(self):
         n_features = 100
@@ -66,4 +69,5 @@ class TestRGFMatrix(object):
         for i in range(n_samples):
             np.testing.assert_allclose(rgf_matrix.target_get(i), y[i])
             for j in range(n_features):
-                np.testing.assert_allclose(rgf_matrix.feature_get(i, j), X[i, j])
+                np.testing.assert_allclose(
+                    rgf_matrix.feature_get(i, j), X[i, j])

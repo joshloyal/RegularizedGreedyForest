@@ -33,7 +33,6 @@ class TestRegularizedGreedyForest(object):
         test_score = metrics.roc_auc_score(y_test, y_proba)
         assert test_score > 0.75
 
-
     def test_train_classification_weighted(self):
         (X_train, y_train), (X_test, y_test) = get_test_data()
         sample_weight = np.ones_like(y_train)
